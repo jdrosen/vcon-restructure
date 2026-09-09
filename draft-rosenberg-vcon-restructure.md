@@ -9,19 +9,19 @@ number:
 date:
 consensus: true
 v: 3
-area: AREA
-workgroup: WG Working Group
+area: "Applications and Real-Time"
+workgroup: "Virtualized Conversations"
 keyword:
  - next generation
  - unicorn
  - AI-native
 venue:
-  group: WG
-  type: Working Group
-  mail: WG@example.com
-  arch: https://example.com/WG
-  github: USER/REPO
-  latest: https://example.com/LATEST
+  group: "Virtualized Conversations"
+  type: "Working Group"
+  mail: "vcon@ietf.org"
+  arch: "https://mailarchive.ietf.org/arch/browse/vcon/"
+  github: "jdrosen/vcon-restructure"
+  latest: "https://jdrosen.github.io/vcon-restructure/draft-rosenberg-vcon-restructure.html"
 
 author:
  -
