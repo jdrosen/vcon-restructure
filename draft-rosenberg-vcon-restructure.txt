@@ -8,7 +8,8 @@ Intended status: Informational                          9 September 2026
 Expires: 13 March 2027
 
 
-                           TODO - Your title
+Virtualized Conversations (VCON) Restructure to Facilitate AI Agent Use
+                                 Cases
                   draft-todo-yourname-protocol-latest
 
 Abstract
