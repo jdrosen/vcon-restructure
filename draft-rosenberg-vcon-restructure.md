@@ -19,8 +19,8 @@
 # Change the file extension to match the format (.xml for XML, etc...)
 #
 ###
-title: "TODO - Your title"
-abbrev: "TODO - Abbreviation"
+title: "Virtualized Conversations (VCON) Restructure to Facilitate AI Agent Use Cases"
+abbrev: "VCON Restructure"
 category: info
 
 docname: draft-todo-yourname-protocol-latest
