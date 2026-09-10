@@ -272,7 +272,7 @@ Consider a simple Webex or Zoom meeting or similar. There are three participants
         - participant: P3
 
 
-It looks a lot like the VCON for the 2-party call with notable differences. First, there is a third party in the party list. There is still a single dialog, representing the recording of the entire meeting from T1 to T2. We also have the list of contributors - P1, P2 and P3. Being in the list means that they contributed to the dialog at some point. Notice however, the list of participants is removed from the dialog object. This is because the three participants joined at different times a few minutes after the meeting start. The definition provided for the participants object in a dialog is that - presence there means that user received the entirety of the dialog. In this case, none of them did because 
+It looks a lot like the VCON for the 2-party call with notable differences. First, there is a third party in the party list. There is still a single dialog, representing the recording of the entire meeting from T1 to T2. We also have the list of contributors - P1, P2 and P3. Being in the list means that they contributed to the dialog at some point. Notice however, the list of participants is removed from the dialog object. This is because the three participants joined at different times a few minutes after the meeting start. The definition provided for the participants object in a dialog is that - presence there means that user received the entirety of the dialog. In this case, none of them did because.
 
 
 
@@ -297,7 +297,7 @@ It looks a lot like the VCON for the 2-party call with notable differences. Firs
 
 # AI Authorship Declaration
 
-No AI was used to author this document. 
+No AI was used to author this document.
 
 
 # Security Considerations {#security}
