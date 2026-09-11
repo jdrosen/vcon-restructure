@@ -63,7 +63,15 @@ During the VCON interim meeting on 9th September 2026, a proposal was floated fo
 
 # Data Model
 
-The basic data model is backwards compatible with the current vcon spec, and basically is composed of four primary objects - session (new), events (new), dialog (existing, but modified), and parties/participants (existing, but modified). VCON defines many other attributes, like extensions, subject, etc. which are unchanged and not discussed further here. The goal here is to explain just the primary first-class objects which are central to modeling use cases. Everything else is really just meta-data ontop of that.
+The basic data model is backwards compatible with the current vcon spec, and is composed of four primary objects:
+
+1. Session (new): A session is a container for a conversation, which includes events, dialogs and participants, Most importantly, a session can contain other sessions, enabling a VCON to model a sidebar or usage of AI subagents.
+2. Events (new): An event is something that happens at a single point in time, such as a tool call request, tool call response, DTMF button, and so on.
+3. Dialog (existing, but modified): A dialog is record of information exchanged amongst participants, such as an audio recording, a text message, or an image.
+4. Parties/Participants (existing, but modified): Entities (human users or AI users) which were involved in a session.
+
+
+VCON defines many other attributes, like extensions, subject, etc. which are unchanged and not discussed further here. The goal here is to explain just the primary first-class objects, and then show how they are used to model use cases. As such, this document is not an implementable specification - it is meant to illustrate a proposed data model.
 
 ## Session
 
@@ -75,11 +83,11 @@ In a simple phone call between two people, there is a single session. A traditio
 
 Along similar lines, a conversation between a user and ChatGPT with fresh context represents a single session. If a user calls a 1-800 number and is connected to a voice AI Agent, that is also a single session.
 
-Importantly, a session can contain other sessions. This happens when the parent session spawns the child session. The child session - being a full-fledged session - has its own start and stop, and has a reset of context when it begins - though it will typically be started with context created by the parent session. We consider two examples to make this clear. The first is a meeting which spawns two sidebars. Each sidebar is, in its own right, a distinct meeting - with distinct participants, a distinct timeline. Similarly, an AI Agent session - such as a Claude Code session - can result in spawning of sub-agents to perform a certain task. Each of those would be a distinct session.
+Importantly, a session can contain other sessions. This happens when the parent session spawns the child session. The child session - being a full-fledged session - has its own start and stop, and has a reset of context when it begins - though it will typically be started with context created by the parent session. We consider two examples to make this clear. The first is a meeting which spawns two sidebars. Each sidebar is, in its own right, a distinct meeting - with distinct participants and a distinct timeline. Similarly, an AI Agent session - such as a Claude Code session - can result in spawning of sub-agents to perform a certain task. Each of those would be a distinct session.
 
 A session has participants, which refer to the entities (humans and AI agents) which were privy to at least some portion of the session. They may not have all been there all of the time, however.
 
-A session has an ID, unique only to the internals of the VCON document. This allows for sessions to reference each other.
+A session has an ID, unique only to the internals of the VCON document. This allows for sessions to reference each other within a VCON.
 
 The top level VCON has an array of sessions. One use case where there might be more than one, is when a VCON represents all of the calls made by a particular user in a given month, exported as a single VCON. In that case, there would be many sessions, one for each call. The top-level parties object would contain that user's party information, but also there would be an entry for every other person that the user in question spoke to.
 
@@ -98,7 +106,7 @@ In summary:
 
 The VCON specification defines Parties as an array of participants at the top-level of the VCON object. This remains as it is - a list of participants that were involved somehow in the conversaion(s) decribed by the VCON object. This document proposes adding an "id" parameter, which is an identifier for this participant unique only within the confines of the VCON object. This allows for easy reference to each party from the other objects in the data model - session, event and dialog.
 
-A session contains an array of Participants, each one of which is the id of a participant that was involved in the session. As noted above, a party is included in the list of participants  n the session if that party was involved in the session at some point.
+A session contains an array of Participants, each one of which is the id of a participant that was involved in the session. As noted above, a party is included in the list of participants in the session if that party was involved in the session at some point.
 
 A dialog contains an array of Participants, each of which is the id of a participant that received the entire content of the dialog.
 
@@ -110,7 +118,7 @@ The current VCON includes a parties array as a child of dialog. The Participants
 
 ## Events
 
-An event is a point-in-time action performed by a singular participant relevant to the conversation, such as pressing a DTMF key, the departure of a user from the conversation, or the invocation of a tool.
+An event is a point-in-time action performed by a singular participant relevant to the conversation, such as pressing a DTMF key, the departure of a user from the conversation, or the invocation of a tool by an AI Agent.
 
 An event always happens within a context of a session. In other words, the session is a container and it contains events (and dialogs). This means that the session object includes an array of events. This is optional, since there may not be any events.
 
@@ -141,15 +149,18 @@ A dialog represents a piece of content contributed by one or more participants, 
 
 In this data model, Dialogs are included within a session. Each session has an array of Dialogs. The VCON spec allows the Dialog object to exist as a top-level object too. This document proposes retaining that for backwards compatibility; but go-forward implementations should include them only at the session level.
 
-The main example of a dialog is an audio recording. Their usage in VCON allows for several distinct ways to represent the audio content of a session.
+The main example of a dialog is an audio recording. Their usage in VCON allows for several distinct ways to represent the audio content of a session. One common way is to have a single dialog. Even then, the model allows several distinct ways to use the dialog.
 
 1. A single dialog for the entire session, representing the mix of audio from all participants, in a single audio channel.
 2. A single dialog for the entire session, with multiple channels, and a channel dedicated to each participant
-3. A single dialog for the entire session, with multiple channels, and each channel contains a mix of one or more participants [NOTE: This is a common use case when stereo recordings are made off of a multiparty call; one participant usually shows up in one channel, and the mix of the others in the second channel]
-4. Multiple dialogs in the session, where each dialog represents a non-overlapping segment of time, and contains the mix of audio from all participants
-5. Multiple dialogs in the session, where each dialog represents a non-overlapping segment of time, and contains the mix of audio from those participants who were speaking at that time,
-6. Multiple dialogs in the session, where each dialog represents a non-overlapping segment of time, and contains the a multi-channel audio file where each participant that was speaking during that segment of time is in its own channel
-7. Multiple dialogs in the session, where the dialogs are overlapping in time, and it contains the audio content from a single participant. For example, if there were three participants in a conference call, there would be three dialogs, each of which begins when that participant joins the meeting, and ends when that participant leaves
+3. A single dialog for the entire session, with multiple channels, and each channel contains a mix of one or more participants. This is a common use case when stereo recordings are made off of a multiparty call; one participant usually shows up in one channel, and the mix of the others in the second channel.
+
+Alternatively, a single session can have multiple dialogs. There are many distinct and useful use cases for this.
+
+4. One dialog for each participant. In this case, each dialog runs for the duration that the user was in the session.
+5. One dialog for each block of 5mins in the session. For example, a 60min call would have 12 dialogs, each representing a 5min block of time. In this case, each dialog might contain audio from multiple participants, and can be created using any of the three single-dialog approaches noted above.
+6. One dialog per speaking turn per speaker. If multiple users speak at the same time, then the dialogs overlap in time. This is the most natural way to model conversations between a human and an AI Agent.
+
 
 The goal is that the dialog object can support all of these, and it is up to the generator of the VCON to decide which to use.
 
@@ -165,6 +176,8 @@ Note well - the omission of a user from the participants list does NOT mean that
 There is in essence two distinct lists of participants here - those that contributed, and those that received. This allows the dialog model to represent asymmetric use cases. One such example is a town-hall style meeting, where an executive is speaking to the company. In such a use case, there would be a single contributor, but multiple participants receiving it. Indeed, the model allows for the VCOn to capture who heard what portions of the meeting, which can be useful for cases where a user is required to participate in a meeting, and their attendance is to be recorded.
 
 For backwards compatibility, the dialog object still supports the parties attribute, but it is effectively superceded by the two new attributes defined here.
+
+There is a list of Participants in the dialog, but also at the Session level. These allow for different granularity of modeling. Participants at the session level just indicate "who was here" without specifics on exactly what they heard and didnt hear. Participants at the dialog level specifically indicate that the given participant received that dialog. A VCON which has a single dialog for an entire meeting, would not have participants at the dialog level, and only at the session level. A VCON used to demonstrate exactly who heard what portions of a meeting - perhaps for purposes of demonstrating participation - might have them only at a dialog level and not bother at a session level.
 
 The recording-set type is removed in this proposal, replaced by the session concept.
 
